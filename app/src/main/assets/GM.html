@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>油猴函数webView写法</title>
+		<style>
+			.main {
+				display: flex;
+				flex-direction: column;
+				top: 0;
+				position: fixed;
+				margin: auto;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				justify-content: center;
+				align-items: center;
+			}
+			.main button {
+				margin: 10px 0;
+				border: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="main">
+			<button id="GM_xmlhttpRequest">点击 GM_xmlhttpRequest 调用</button>
+			<button id="GM_addStyle">点击 GM_addStyle 调用 设置背景颜色</button>
+			<button id="GM_setValue">点击 GM_setValue 调用 保存数据 key 123</button>
+			<button id="GM_getValue">点击 GM_getValue 调用 读取数据 key</button>
+			<button id="GM_deleteValue">点击 GM_deleteValue 调用 删除数据 key</button>
+			<button id="GM_setClipboard">
+				点击 GM_setClipboard 调用 复制"这是复制信息"到剪贴板
+			</button>
+			<button id="GM_registerMenuCommand">
+				点击 GM_registerMenuCommand 调用 注册菜单 菜单0 key
+			</button>
+			<button id="GM_unregisterMenuCommand">
+				点击 GM_unregisterMenuCommand 调用 卸载全部菜单
+			</button>
+		</div>
+	</body>
+
+	<script>
+		console.log("注册的全局函数", window._GM_);
+		var btnGM_xmlhttpRequest = document.querySelector("#GM_xmlhttpRequest");
+		var btnGM_addStyle = document.querySelector("#GM_addStyle");
+		var btnGM_setValue = document.querySelector("#GM_setValue");
+		var btnGM_getValue = document.querySelector("#GM_getValue");
+		var btnGM_deleteValue = document.querySelector("#GM_deleteValue");
+		var btnGM_setClipboard = document.querySelector("#GM_setClipboard");
+		var btnGM_registerMenuCommand = document.querySelector(
+			"#GM_registerMenuCommand"
+		);
+		var btnGM_unregisterMenuCommand = document.querySelector(
+			"#GM_unregisterMenuCommand"
+		);
+		btnGM_xmlhttpRequest.onclick = function () {
+			GM_xmlhttpRequest({
+				url: "https://img.binmt.cc/",
+				method: "get",
+				timeout: 5000,
+				async: false,
+				responseType: "html",
+				onload: function (response) {
+					console.log("成功加载", response);
+					alert("状态: " + response.status);
+					alert("最终URL:" + response.finalUrl);
+					alert("获取的内容:" + response.responseText);
+				},
+				onabort: function (response) {
+					console.log("意外中断", response);
+					alert("意外中断");
+				},
+				ontimeout: function (response) {
+					console.log("超时", response);
+					alert("超时");
+				},
+				onerror: function (response) {
+					console.log("错误", response);
+					alert("错误");
+				},
+			});
+		};
+		btnGM_addStyle.onclick = function () {
+			GM_addStyle("#GM_addStyle{background: red;color: white;}");
+		};
+		btnGM_setValue.onclick = function () {
+			GM_setValue("key", 123);
+			alert("保存 key 123");
+		};
+		btnGM_getValue.onclick = function () {
+			alert(GM_getValue("key", "获取失败"));
+		};
+		btnGM_deleteValue.onclick = function () {
+			GM_deleteValue("key");
+		};
+		btnGM_setClipboard.onclick = function () {
+			GM_setClipboard("这是复制信息");
+		};
+		let Menu_List = [];
+		let Menu_index = 0;
+		btnGM_registerMenuCommand.onclick = function () {
+			let _GM_index_ = Menu_index;
+			let menuId = GM_registerMenuCommand("菜单 " + _GM_index_, function () {
+				alert("删除菜单 " + _GM_index_ + ": " + menuId);
+				GM_unregisterMenuCommand(menuId);
+			});
+			Menu_List = [...Menu_List, menuId];
+			this.innerText =
+				"点击 GM_registerMenuCommand 调用 注册菜单 菜单" + _GM_index_ + " key";
+			console.log(this.innerText, Menu_List);
+			Menu_index++;
+		};
+		btnGM_unregisterMenuCommand.onclick = function () {
+			console.log(Menu_List.toString());
+			Menu_List.forEach((item) => {
+				console.log("删除", item);
+				GM_unregisterMenuCommand(item);
+			});
+		};
+	</script>
+</html>
